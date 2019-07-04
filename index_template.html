@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>A-Frame Path Viewer</title>
+    <meta name="description" content="A-Frame Path Viewer">
+    <script src="https://aframe.io/releases/0.9.2/aframe.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.min.js"></script>
+  </head>
+  <body>
+  <script>
+    //https://jsbin.com/dasefeh/edit?html,output
+    //https://stackoverflow.com/a/39518746
+(function() {
+'use strict';
+
+
+
+var alongpathComp = {
+  schema: {
+    path     : { default: ''    },
+    closed   : { default: false },
+    dur      : { default: 1000  }
+  },
+
+  init: function() {
+      var ent = this.el;
+      var d = this.data;
+      var points = d.path.split(' ').map(function(p) {
+          p = p.split(',');
+          return new THREE.Vector3(
+              parseFloat(p[0]),
+              parseFloat(p[1]),
+              parseFloat(p[2])
+          );
+      });
+      var ctor = d.closed ? 'ClosedSplineCurve3' : 'SplineCurve3';
+      var curve = new THREE[ctor](points);
+
+      var onFrame = function onFrame(t) {
+        window.requestAnimationFrame(onFrame);
+        t = t % d.dur;
+        var i = t / d.dur;
+        try {
+          var p = curve.getPoint(i);
+          ent.setAttribute('position', p);
+        } catch (ex) {}
+      };
+
+      onFrame();
+  },
+
+  update: function(oldData) {},
+
+  remove: function() {}
+};
+
+AFRAME.registerComponent('alongpath', alongpathComp);
+
+})();
+  </script>
+    <a-scene>
+        <a-assets>
+            <a-asset-item id="model-data" src="$model_file">
+          </a-assets>
+          <a-entity id="rig"
+          alongpath="path: $camera_path; closed:true; dur: $time_length"
+          position="0 0 0">
+  <a-entity camera
+            position="0 $height 0"
+            look-controls="pointerLockEnabled: true"></a-entity>
+</a-entity>
+          <!-- <a-entity camera="active: true" look-controls wasd-controls movement-controls position="0 1.6 0" data-aframe-default-camera></a-entity> -->
+      <!-- <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+      <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane> -->
+      <a-gltf-model src="#model-data" scale="$model_scale $model_scale $model_scale" position="0 0 0"></a-gltf-model>
+      <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+  </body>
+</html>

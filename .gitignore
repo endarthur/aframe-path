@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# test data
+quarry_slope/
+model_picked_points.pp
+index.html
